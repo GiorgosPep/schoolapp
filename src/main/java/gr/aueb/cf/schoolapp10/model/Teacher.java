@@ -2,6 +2,7 @@ package gr.aueb.cf.schoolapp10.model;
 
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -29,6 +30,7 @@ public class Teacher extends AbstractEntity{
     private String firstname;
     private String lastname;
 
+    @Setter(AccessLevel.PACKAGE)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "region_id")
     private Region region;
