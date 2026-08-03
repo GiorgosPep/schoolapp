@@ -1,0 +1,26 @@
+package gr.aueb.cf.schoolapp10.service;
+
+import gr.aueb.cf.schoolapp10.dto.RegionReadOnlyDTO;
+import gr.aueb.cf.schoolapp10.mapper.Mapper;
+import gr.aueb.cf.schoolapp10.repository.RegionRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class RegionService implements IRegionService{
+
+    private final RegionRepository regionRepository;
+    private final Mapper mapper;
+    @Override
+    public List<RegionReadOnlyDTO> findAllRegionsSortedByName() {
+        return regionRepository.findByOrderByNameAsc()
+                .stream()
+                .map(mapper::mapToRegionReadOnlyDTO)
+                .toList();
+    }
+}
