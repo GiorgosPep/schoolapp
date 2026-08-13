@@ -10,6 +10,9 @@ import gr.aueb.cf.schoolapp10.service.ITeacherService;
 import gr.aueb.cf.schoolapp10.validator.TeacherInsertValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -70,6 +73,20 @@ public class TeacherController {
         }
         return "teacher-success";
     }
+
+    @GetMapping({"", "/"})
+    public String getPaginatedTeachersDeletedFalse(@PageableDefault(page = 0, size = 5, sort = "lastname") Pageable pageable,
+                                                   Model model){
+        Page<TeacherReadOnlyDTO> teachersPage = teacherService.getPaginatedTeachersDeletedFalse(pageable);
+        model.addAttribute("teachers", teachersPage.getContent());
+        model.addAttribute("page", teachersPage);
+        return "teachers";
+    }
+
+
+
+
+
     @ModelAttribute("regionsReadOnlyDTO")       // εκτελείται πριν από κάθε request handler
     public List<RegionReadOnlyDTO> regions() {
         return regionService.findAllRegionsSortedByName();
