@@ -35,7 +35,6 @@ public class TeacherController {
         model.addAttribute("teacherInsertDTO", TeacherInsertDTO.empty());
 //        model.addAttribute("regionsReadOnlyDTO", regions());
         return "teacher-insert";
-
     }
 
     @PostMapping("/insert")
@@ -45,7 +44,7 @@ public class TeacherController {
 
         teacherInsertValidator.validate(teacherInsertDTO, bindingResult);       // business rules
 
-        if(bindingResult.hasErrors()){
+        if (bindingResult.hasErrors()) {
 //            model.addAttribute("regionsReadOnlyDTO", regions());
             return "teacher-insert";
         }
@@ -53,17 +52,15 @@ public class TeacherController {
         try {
             // save τον teacher
             TeacherReadOnlyDTO teacherReadOnlyDTO = teacherService.saveTeacher(teacherInsertDTO);
-            // επιστρέφει ένα success page
+            // επιστρέψει ένα success page
 
-            //PRG -- Post-Redirect-Get
+            // PRG -- Post-Redirect-Get
             redirectAttributes.addFlashAttribute("teacherReadOnlyDTO", teacherReadOnlyDTO);
             return "redirect:/teachers/success";        // controller
-
         } catch (EntityAlreadyExistsException | EntityInvalidArgumentException e) {
             model.addAttribute("errorMessage", e.getMessage());
             return "teacher-insert";
         }
-
     }
 
     @GetMapping("/success")
@@ -76,10 +73,11 @@ public class TeacherController {
     @ModelAttribute("regionsReadOnlyDTO")       // εκτελείται πριν από κάθε request handler
     public List<RegionReadOnlyDTO> regions() {
         return regionService.findAllRegionsSortedByName();
+
 //        return List.of(
-//                new RegionReadOnlyDTO( 1L, "Αθήνα"),
-//                new RegionReadOnlyDTO( 2L, "Βόλος"),
-//                new RegionReadOnlyDTO( 3L, "Θεσσαλονίκη")
+//                new RegionReadOnlyDTO(1L, "Αθήνα"),
+//                new RegionReadOnlyDTO(2L, "Βόλος"),
+//                new RegionReadOnlyDTO(3L, "Θεσσαλονίκη")
 //        );
     }
 

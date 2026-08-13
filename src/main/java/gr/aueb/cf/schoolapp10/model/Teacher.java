@@ -36,7 +36,9 @@ public class Teacher extends AbstractEntity {
     private Region region;
 
     public Teacher(String firstname, String lastname, String vat) {
-
+        this.firstname = firstname;
+        this.lastname = lastname;
+        this.vat = vat;
     }
 
     @PrePersist

@@ -29,35 +29,35 @@ public class TeacherService implements ITeacherService{
     public TeacherReadOnlyDTO saveTeacher(TeacherInsertDTO dto)
             throws EntityAlreadyExistsException, EntityInvalidArgumentException {
 
-        try{
-            if(dto.vat() != null && isTeacherExistsByVat(dto.vat())) {
+        try {
+//            if (dto.vat() != null && teacherRepository.findByVat(dto.vat()).isPresent()) {
+            if (dto.vat() != null && isTeacherExistsByVat(dto.vat())) {
                 throw new EntityAlreadyExistsException("Teacher with VAT= " + dto.vat() + " already exists");
             }
 
             Region region = regionRepository.findById(dto.regionId())
-                    .orElseThrow(() -> new EntityInvalidArgumentException("Region with id= " + dto.regionId() + " not found"));
+                    .orElseThrow(() -> new EntityInvalidArgumentException("Region id= " + dto.regionId() + " not found"));
 
             Teacher teacher = mapper.mapToTeacherEntity(dto);
             region.addTeacher(teacher);
             teacherRepository.save(teacher);        // pre-persist - saved teacher
-            log.info("Teacher saved with vat= {} saved successfully ", dto.vat()); // Structured Logging -- parameterized placeholder pattern
-            return mapper.mapToTeacherReadOnlyDTO(teacher);
-
-        } catch (EntityAlreadyExistsException e) {
-            log.warn("Save failed for teacher with VAT= {}. Teacher already exists ", dto.vat());
+            log.info("Teacher with vat={} save successfully ", dto.vat());  // Structured Logging -- parameterized placeholder pattern
+            return  mapper.mapToTeacherReadOnlyDTO(teacher);
+        } catch (EntityAlreadyExistsException  e) {
+            log.warn("Save failed for teacher with VAT={}. Teacher already exists", dto.vat());
             throw e;
         } catch (EntityInvalidArgumentException e) {
-            log.warn("Save failed for teacher with VAT= {}. Region with id={} invalid", dto.vat(), dto.regionId());
+            log.warn("Save failed for teacher with VAT={}. Region with id={} invalid", dto.vat(), dto.regionId());
             throw e;
         } catch (DataIntegrityViolationException e) {
-            log.warn("Save failed for teacher with VAT= {}. Teacher already exists ", dto.vat());
-            throw new EntityAlreadyExistsException("Save failer for teacher with VAT= " + dto.vat() + " already exists");
+            log.warn("Save failed for teacher with VAT={}. Teacher exists", dto.vat());
+            throw new EntityAlreadyExistsException("Save failed for teacher with VAT= " + dto.vat() + " already exists");
         }
     }
 
     @Override
     @Transactional(readOnly = true)
     public boolean isTeacherExistsByVat(String vat) {
-        return teacherRepository.findByVAT(vat).isPresent();
+        return teacherRepository.findByVat(vat).isPresent();
     }
 }
