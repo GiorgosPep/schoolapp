@@ -4,6 +4,7 @@ import gr.aueb.cf.schoolapp10.core.exceptions.EntityAlreadyExistsException;
 import gr.aueb.cf.schoolapp10.core.exceptions.EntityInvalidArgumentException;
 import gr.aueb.cf.schoolapp10.core.exceptions.EntityNotFoundException;
 import gr.aueb.cf.schoolapp10.dto.TeacherEditDTO;
+import gr.aueb.cf.schoolapp10.dto.TeacherEditReadOnlyDTO;
 import gr.aueb.cf.schoolapp10.dto.TeacherInsertDTO;
 import gr.aueb.cf.schoolapp10.dto.TeacherReadOnlyDTO;
 import gr.aueb.cf.schoolapp10.mapper.Mapper;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -68,6 +70,20 @@ public class TeacherService implements ITeacherService{
         log.debug("Get paginated teachers not deleted returned successfully page={}, size={}",
                 teachersPage.getNumber(), teachersPage.getSize());
         return teachersPage.map(mapper::mapToTeacherReadOnlyDTO);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public TeacherEditDTO getTeacherByUUIDDeletedFalse(UUID uuid) throws EntityNotFoundException {
+        try{
+            Teacher teacher = teacherRepository.findByUuidAndDeletedFalse(uuid)
+                    .orElseThrow(() -> new EntityNotFoundException("Teacher with uuid= " + uuid + " not found"));
+            log.debug("Teacher with UUID = {} returned successfully", uuid);
+            return mapper.mapToTeacherEditDTO(teacher);
+        } catch(EntityNotFoundException e) {
+            log.warn("Get teacher with UUID = {} not found", uuid);
+            throw e;
+        }
     }
 
     @Transactional(rollbackFor = {EntityAlreadyExistsException.class, EntityNotFoundException.class,

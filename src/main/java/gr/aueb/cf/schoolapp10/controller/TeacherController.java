@@ -2,9 +2,8 @@ package gr.aueb.cf.schoolapp10.controller;
 
 import gr.aueb.cf.schoolapp10.core.exceptions.EntityAlreadyExistsException;
 import gr.aueb.cf.schoolapp10.core.exceptions.EntityInvalidArgumentException;
-import gr.aueb.cf.schoolapp10.dto.RegionReadOnlyDTO;
-import gr.aueb.cf.schoolapp10.dto.TeacherInsertDTO;
-import gr.aueb.cf.schoolapp10.dto.TeacherReadOnlyDTO;
+import gr.aueb.cf.schoolapp10.core.exceptions.EntityNotFoundException;
+import gr.aueb.cf.schoolapp10.dto.*;
 import gr.aueb.cf.schoolapp10.service.IRegionService;
 import gr.aueb.cf.schoolapp10.service.ITeacherService;
 import gr.aueb.cf.schoolapp10.validator.TeacherInsertValidator;
@@ -16,13 +15,11 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/teachers")
@@ -83,7 +80,34 @@ public class TeacherController {
         return "teachers";
     }
 
+    @GetMapping("/edit/{uuid}")
+    public String getTeacherEdit(@PathVariable UUID uuid, Model model) {
+        try {
+            TeacherEditDTO teacherEditDTO = teacherService.getTeacherByUUIDDeletedFalse(uuid);
+            model.addAttribute("teacherEditDTO", teacherEditDTO);
+        }
+        catch (EntityNotFoundException e) {
+            model.addAttribute("errorMessage", e.getMessage());
+            return "teacher-edit";
+        }
+        return "teacher-edit";
+    }
 
+    @PostMapping("/edit")
+    public String updateTeacher(@Valid @ModelAttribute TeacherEditDTO teacherEditDTO,
+                                BindingResult bindingResult, RedirectAttributes redirectAttributes,
+                                Model model) {
+
+        }
+
+        try {
+            TeacherReadOnlyDTO updatedTeacher = teacherService.updateTeacher(teacherEditDTO);
+            return "redirect:/teachers/success";
+        } catch (EntityAlreadyExistsException | EntityNotFoundException | EntityInvalidArgumentException e) {
+            // Handle the exception (e.g., display an error message)
+            return "teacher-edit";
+        }
+    }
 
 
     @ModelAttribute("regionsReadOnlyDTO")       // εκτελείται πριν από κάθε request handler
