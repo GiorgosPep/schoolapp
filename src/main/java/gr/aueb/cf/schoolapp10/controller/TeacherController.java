@@ -6,6 +6,7 @@ import gr.aueb.cf.schoolapp10.core.exceptions.EntityNotFoundException;
 import gr.aueb.cf.schoolapp10.dto.*;
 import gr.aueb.cf.schoolapp10.service.IRegionService;
 import gr.aueb.cf.schoolapp10.service.ITeacherService;
+import gr.aueb.cf.schoolapp10.validator.TeacherEditValidator;
 import gr.aueb.cf.schoolapp10.validator.TeacherInsertValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class TeacherController {
     private final ITeacherService teacherService;
     private final IRegionService regionService;
     private final TeacherInsertValidator teacherInsertValidator;
+    private final TeacherEditValidator teacherEditValidator;
 
     @GetMapping("/insert")
     public String getTeacherForm(Model model) {
@@ -97,16 +99,27 @@ public class TeacherController {
     public String updateTeacher(@Valid @ModelAttribute TeacherEditDTO teacherEditDTO,
                                 BindingResult bindingResult, RedirectAttributes redirectAttributes,
                                 Model model) {
-
-        }
-
-        try {
-            TeacherReadOnlyDTO updatedTeacher = teacherService.updateTeacher(teacherEditDTO);
-            return "redirect:/teachers/success";
-        } catch (EntityAlreadyExistsException | EntityNotFoundException | EntityInvalidArgumentException e) {
-            // Handle the exception (e.g., display an error message)
+        teacherEditValidator.validate(teacherEditDTO, bindingResult);
+        if(bindingResult.hasErrors()) {
             return "teacher-edit";
         }
+
+        try{
+            TeacherReadOnlyDTO readOnlyDTO = teacherService.updateTeacher(teacherEditDTO);
+            redirectAttributes.addFlashAttribute("teacherReadOnlyDTO", readOnlyDTO);
+            return "redirect:/teachers/update-teacher-success";
+        } catch(EntityNotFoundException | EntityAlreadyExistsException | EntityInvalidArgumentException e) {
+            model.addAttribute("errorMessage", e.getMessage());
+            return "teacher-edit";
+        }
+    }
+
+    @GetMapping("/update-success")
+    public String teacherUpdateSuccess(Model model) {
+        if (!model.containsAttribute("teacherReadOnlyDTO")) {     // ελέγχει το F5 - refresh
+            return "redirect:/teachers";
+        }
+        return "update-teacher-success";
     }
 
 
