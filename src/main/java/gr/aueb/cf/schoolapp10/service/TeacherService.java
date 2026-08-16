@@ -61,7 +61,7 @@ public class TeacherService implements ITeacherService{
     @Transactional(readOnly = true)
     public Page<TeacherReadOnlyDTO> getPaginatedTeachersDeletedFalse(Pageable pageable) {
         Page<Teacher> teachersPage = teacherRepository.findAllByDeletedFalse(pageable);
-        log.debug("Get paginated teachers not deleted returned successfully page = {}, size = {}",
+        log.debug("Get paginated teachers not deleted returned successfully page={}, size={}",
                 teachersPage.getNumber(), teachersPage.getSize());
         return teachersPage.map(mapper::mapToTeacherReadOnlyDTO);
     }
@@ -69,7 +69,7 @@ public class TeacherService implements ITeacherService{
     @Transactional(readOnly = true)
     public Page<TeacherReadOnlyDTO> getPaginatedTeachers(Pageable pageable) {
         Page<Teacher> teachersPage = teacherRepository.findAll(pageable);
-        log.debug("Get paginated teachers not deleted returned successfully page = {}, size = {}",
+        log.debug("Get paginated teachers returned successfully page={}, size={}",
                 teachersPage.getNumber(), teachersPage.getSize());
         return teachersPage.map(mapper::mapToTeacherReadOnlyDTO);
     }

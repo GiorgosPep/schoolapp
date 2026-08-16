@@ -74,15 +74,14 @@ public class TeacherController {
         return "teacher-success";
     }
 
-    @GetMapping({"", "/"})
+    @GetMapping({ "", "/"})
     public String getPaginatedTeachersDeletedFalse(@PageableDefault(page = 0, size = 5, sort = "lastname") Pageable pageable,
-                                                   Model model){
+                                                   Model model) {
         Page<TeacherReadOnlyDTO> teachersPage = teacherService.getPaginatedTeachersDeletedFalse(pageable);
         model.addAttribute("teachers", teachersPage.getContent());
         model.addAttribute("page", teachersPage);
         return "teachers";
     }
-
 
 
 
