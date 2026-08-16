@@ -2,6 +2,8 @@ package gr.aueb.cf.schoolapp10.service;
 
 import gr.aueb.cf.schoolapp10.core.exceptions.EntityAlreadyExistsException;
 import gr.aueb.cf.schoolapp10.core.exceptions.EntityInvalidArgumentException;
+import gr.aueb.cf.schoolapp10.core.exceptions.EntityNotFoundException;
+import gr.aueb.cf.schoolapp10.dto.TeacherEditDTO;
 import gr.aueb.cf.schoolapp10.dto.TeacherInsertDTO;
 import gr.aueb.cf.schoolapp10.dto.TeacherReadOnlyDTO;
 import gr.aueb.cf.schoolapp10.mapper.Mapper;
@@ -16,6 +18,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -66,7 +70,51 @@ public class TeacherService implements ITeacherService{
         return teachersPage.map(mapper::mapToTeacherReadOnlyDTO);
     }
 
-    public TeacherReadOnlyDTO updateTeacher(TeacherEditDTO dto) {
+    @Transactional(rollbackFor = {EntityAlreadyExistsException.class, EntityNotFoundException.class,
+            EntityInvalidArgumentException.class})
+    @Override
+    public TeacherReadOnlyDTO updateTeacher(TeacherEditDTO dto) throws EntityAlreadyExistsException,
+            EntityNotFoundException, EntityInvalidArgumentException {
+        try {
+            Teacher teacher = teacherRepository.findByUuidAndDeletedFalse(dto.uuid())
+                    .orElseThrow(() -> new EntityNotFoundException("Teacher with uuid= " + dto.uuid() + " not found"));
+
+            if (!teacher.getVat().equals(dto.vat())) {  //TODO use Objects utility class for null safety
+                if (teacherRepository.findByVatAndDeletedFalse(dto.vat()).isPresent()) {
+                    throw new EntityAlreadyExistsException("Teacher with VAT= " + dto.vat() + " already exists");
+                }
+                teacher.setVat(dto.vat());
+            }
+
+            teacher.setFirstname(dto.firstname());
+            teacher.setLastname(dto.lastname());
+
+            if(!Objects.equals(teacher.getRegion().getId(), dto.regionId())) {
+                Region region = regionRepository.findById(dto.regionId())
+                        .orElseThrow(() -> new EntityInvalidArgumentException("Region with id= " + dto.regionId() + " not found"));
+                Region oldRegion = teacher.getRegion();
+
+                if (oldRegion != null) {
+                    oldRegion.removeTeacher(teacher);
+                }
+                region.addTeacher(teacher);
+            }
+
+            teacherRepository.save(teacher);        // προαιρετικό dirty check
+            log.info("Teacher with VAT={} updated successfully", dto.vat());
+            return mapper.mapToTeacherReadOnlyDTO(teacher);
+
+        } catch (EntityNotFoundException e) {
+            log.warn("Update failed for teacher with VAT={}. Teacher not found", dto.vat());
+            throw e;
+
+        } catch (EntityAlreadyExistsException e) {
+            log.warn("Update failed for teacher with VAT={}. Teacher already exists", dto.vat());
+            throw e;
+        } catch (EntityInvalidArgumentException e) {
+            log.warn("Update failed for teacher with VAT={}. Region with id={} invalid", dto.vat(), dto.regionId());
+            throw e;
+        }
 
     }
 
