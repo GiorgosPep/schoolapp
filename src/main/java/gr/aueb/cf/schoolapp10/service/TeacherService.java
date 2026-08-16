@@ -65,6 +65,12 @@ public class TeacherService implements ITeacherService{
                 teachersPage.getNumber(), teachersPage.getSize());
         return teachersPage.map(mapper::mapToTeacherReadOnlyDTO);
     }
+
+    public TeacherReadOnlyDTO updateTeacher(TeacherEditDTO dto) {
+
+    }
+
+
     @Override
     @Transactional(readOnly = true)
     public Page<TeacherReadOnlyDTO> getPaginatedTeachers(Pageable pageable) {
