@@ -107,7 +107,7 @@ public class TeacherController {
         try{
             TeacherReadOnlyDTO readOnlyDTO = teacherService.updateTeacher(teacherEditDTO);
             redirectAttributes.addFlashAttribute("teacherReadOnlyDTO", readOnlyDTO);
-            return "redirect:/teachers/update-teacher-success";
+            return "redirect:/teachers/update-success";
         } catch(EntityNotFoundException | EntityAlreadyExistsException | EntityInvalidArgumentException e) {
             model.addAttribute("errorMessage", e.getMessage());
             return "teacher-edit";
