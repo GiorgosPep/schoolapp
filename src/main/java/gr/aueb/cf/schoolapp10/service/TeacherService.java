@@ -20,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.swing.text.html.parser.Entity;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -70,6 +71,24 @@ public class TeacherService implements ITeacherService{
         log.debug("Get paginated teachers not deleted returned successfully page={}, size={}",
                 teachersPage.getNumber(), teachersPage.getSize());
         return teachersPage.map(mapper::mapToTeacherReadOnlyDTO);
+    }
+
+    @Override
+    @Transactional(rollbackFor = EntityNotFoundException.class)
+    public TeacherReadOnlyDTO deleteTeacherByUUID(UUID uuid) throws EntityNotFoundException {
+        try {
+            Teacher teacher = teacherRepository.findByUuidAndDeletedFalse(uuid).
+                    orElseThrow(() -> new EntityNotFoundException("Teacher with uuid = " + uuid + " not found"));
+
+            teacher.softDelete();
+            //no explicit save needed due to dirty check
+            //teacherRepository.save(teacher);
+            log.info("Teacher with UUID = {} deleted successfully. ", uuid);
+            return mapper.mapToTeacherReadOnlyDTO(teacher);
+        } catch (EntityNotFoundException e) {
+            log.warn("Deleted failed. Teacher with UUID ={} not found. ", uuid);
+            throw e;
+        }
     }
 
     @Override
