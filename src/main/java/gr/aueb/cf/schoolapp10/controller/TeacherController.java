@@ -120,8 +120,7 @@ public class TeacherController {
         try {
             TeacherReadOnlyDTO readOnlyDTO = teacherService.deleteTeacherByUUID(uuid);
             redirectAttributes.addFlashAttribute("teacherReadOnlyDTO", readOnlyDTO);
-            return "redirect: /teachers/delete-success";
-
+            return "redirect:/teachers/delete-success";
         } catch (EntityNotFoundException e) {
             model.addAttribute("errorMessage", e.getMessage());
             return "teachers";
@@ -130,10 +129,10 @@ public class TeacherController {
 
     @GetMapping("/delete-success")
     public String deleteTeacherSuccess(Model model) {
-        if(!model.containsAttribute("teacherReadOnlyDTO")) {
-            return "redirect: /teachers";
+        if (!model.containsAttribute("teacherReadOnlyDTO")) {
+            return "redirect:/teachers";
         }
-        return "delete-teacher-success";
+        return  "delete-teacher-success";
     }
 
     @GetMapping("/update-success")
