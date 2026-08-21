@@ -46,7 +46,6 @@ public class User extends AbstractEntity implements UserDetails {
         Set<GrantedAuthority> grantedAuthorities =  new HashSet<>();
         grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
         role.getCapabilities()
-
                 .forEach(capability -> grantedAuthorities.add(new SimpleGrantedAuthority(capability.getName())));
         return grantedAuthorities;
     }
